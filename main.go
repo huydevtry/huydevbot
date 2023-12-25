@@ -37,7 +37,7 @@ func main() {
 
 	// Start server for receiving requests from the Telegram
 	go func() {
-		_ = bot.StartWebhook("localhost:8080")
+		_ = bot.StartWebhook("0.0.0.0:8080")
 	}()
 
 	// Stop reviving updates from update channel and shutdown webhook server
