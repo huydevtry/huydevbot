@@ -1,21 +1,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/mymmrac/telego"
 	"huydevbot/Message"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/fasthttp/router"
-	"github.com/valyala/fasthttp"
-	"golang.ngrok.com/ngrok"
-	"golang.ngrok.com/ngrok/config"
-
-	"github.com/mymmrac/telego"
 )
 
 func main() {
@@ -31,80 +22,31 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	// Set up a webhook on Telegram side
+	/*	_ = bot.SetWebhook(&telego.SetWebhookParams{
+		URL: "https://example.com/bot" + bot.Token(),
+	})*/
 
-	// Initialize signal handling
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	// Receive information about webhook
+	/*	info, _ := bot.GetWebhookInfo()
+		fmt.Printf("Webhook Info: %+v\n", info)*/
 
-	// Initialize done chan
-	done := make(chan struct{}, 1)
-
-	// Create a new Ngrok tunnel to connect local network with the Internet & have HTTPS domain for bot
-	tun, err := ngrok.Listen(context.Background(),
-		// Forward connections to localhost:8080
-		config.HTTPEndpoint(config.WithForwardsTo(":8080")),
-		// Authenticate into Ngrok using NGROK_AUTHTOKEN env (optional)
-		ngrok.WithAuthtokenFromEnv(),
-	)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// Prepare fast HTTP server
-	srv := &fasthttp.Server{}
-
-	// Get an update channel from webhook using Ngrok
-	updates, _ := bot.UpdatesViaWebhook("/bot"+bot.Token(),
-		// Set func server with fast http server inside that will be used to handle webhooks
-		telego.WithWebhookServer(telego.FuncWebhookServer{
-			Server: telego.FastHTTPWebhookServer{
-				Logger: bot.Logger(),
-				Server: srv,
-				Router: router.New(),
-			},
-			// Override default start func to use Ngrok tunnel
-			// Note: When server is stopped, the Ngrok tunnel always returns an error, so it should be handled by user
-			StartFunc: func(_ string) error {
-				return srv.Serve(tun)
-			},
-		}),
-
-		// Calls SetWebhook before starting webhook and provide dynamic Ngrok tunnel URL
-		telego.WithWebhookSet(&telego.SetWebhookParams{
-			URL: tun.URL() + "/bot" + bot.Token(),
-		}),
-	)
-
-	// Handle stop signal (Ctrl+C)
-	go func() {
-		// Wait for stop signal
-		<-sigs
-
-		fmt.Println("Stopping...")
-
-		// Stop reviving updates from update channel and shutdown webhook server
-		_ = bot.StopWebhook()
-		fmt.Println("Webhook done")
-
-		// Notify that stop is done
-		done <- struct{}{}
-	}()
+	// Get an update channel from webhook.
+	// (more on configuration in examples/updates_webhook/main.go)
+	updates, _ := bot.UpdatesViaWebhook("/bot" + bot.Token())
 
 	// Start server for receiving requests from the Telegram
 	go func() {
-		_ = bot.StartWebhook("")
+		_ = bot.StartWebhook("localhost:8080")
+	}()
+
+	// Stop reviving updates from update channel and shutdown webhook server
+	defer func() {
+		_ = bot.StopWebhook()
 	}()
 
 	// Loop through all updates when they came
-	go func() {
-		for update := range updates {
-			//fmt.Printf("Update: %+v\n", update)
-			Message.HandleMessage(update, bot)
-		}
-	}()
-
-	// Wait for the stop process to be completed
-	<-done
-	fmt.Println("Done")
+	for update := range updates {
+		Message.HandleMessage(update, bot)
+	}
 }
