@@ -26,7 +26,7 @@ func main() {
 
 	// Set up a webhook on Telegram side
 	_ = bot.SetWebhook(&telego.SetWebhookParams{
-		URL: url + bot.Token(),
+		URL: url + "/bot" + bot.Token(),
 	})
 
 	// Receive information about webhook
