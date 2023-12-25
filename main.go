@@ -15,6 +15,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	botToken := os.Getenv("TOKEN")
+	url := os.Getenv("URL_WEBHOOK")
 
 	// Note: Please keep in mind that default logger may expose sensitive information, use in development only
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
@@ -22,14 +23,15 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 	// Set up a webhook on Telegram side
-	/*	_ = bot.SetWebhook(&telego.SetWebhookParams{
-		URL: "https://example.com/bot" + bot.Token(),
-	})*/
+	_ = bot.SetWebhook(&telego.SetWebhookParams{
+		URL: url + bot.Token(),
+	})
 
 	// Receive information about webhook
-	/*	info, _ := bot.GetWebhookInfo()
-		fmt.Printf("Webhook Info: %+v\n", info)*/
+	info, _ := bot.GetWebhookInfo()
+	fmt.Printf("Webhook Info: %+v\n", info)
 
 	// Get an update channel from webhook.
 	// (more on configuration in examples/updates_webhook/main.go)
