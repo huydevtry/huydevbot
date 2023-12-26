@@ -47,6 +47,12 @@ func HandleMessage(update telego.Update, bot *telego.Bot) {
 	}
 
 	respContent := resp.Choices[0].Message.Content
+
+	//Process message response
+	backtickStr := "```"
+	if strings.Contains(respContent, backtickStr) {
+		respContent = strings.Replace(respContent, backtickStr, "\n"+backtickStr+"\n", -1)
+	}
 	_, _ = bot.SendMessage(
 		tu.Message(
 			tu.ID(chatId),
