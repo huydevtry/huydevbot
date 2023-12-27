@@ -28,11 +28,11 @@ func HandleMessage(update telego.Update, bot *telego.Bot) {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
+			Model: openai.GPT4TurboPreview,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    "system",
-					Content: "You are a bot of Huy đẹp trai",
+					Content: "Bạn là một bot của Huy đẹp trai",
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
