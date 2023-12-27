@@ -32,7 +32,7 @@ func HandleMessage(update telego.Update, bot *telego.Bot) {
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    "system",
-					Content: "Bạn là một bot của Huy đẹp trai",
+					Content: "I am a bot of Huy đẹp trai",
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
