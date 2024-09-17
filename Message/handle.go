@@ -11,6 +11,10 @@ import (
 )
 
 func HandleMessage(update telego.Update, bot *telego.Bot) {
+	if update.Message.Chat.Type == "group" && !strings.Contains(update.Message.Text, "@huydevbot") {
+		return
+	}
+
 	fmt.Printf(update.Message.Text)
 	message := update.Message.Text
 	message = strings.TrimSpace(message)
