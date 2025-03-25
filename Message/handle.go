@@ -11,7 +11,7 @@ import (
 )
 
 func HandleMessage(update telego.Update, bot *telego.Bot) {
-	if update.Message.Chat.Type == "group" && !strings.Contains(update.Message.Text, "@huydevbot") {
+	if (update.Message.Chat.Type == "supergroup" || update.Message.Chat.Type == "group") && !strings.Contains(update.Message.Text, "@huydevbot") {
 		return
 	}
 
