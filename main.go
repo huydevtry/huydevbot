@@ -49,6 +49,8 @@ func main() {
 
 	// Loop through all updates when they came
 	for update := range updates {
+		// In toàn bộ nội dung của update
+    		fmt.Printf("Received Update: %+v\n", update)
 		Message.HandleMessage(update, bot)
 	}
 }
